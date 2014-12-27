@@ -19,8 +19,6 @@ static void key_up(unsigned char key, int x, int y);
 static void mouse(int bn, int state, int x, int y);
 static void motion(int x, int y);
 
-static float cam_theta, cam_phi, cam_dist = 6;
-
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
@@ -30,7 +28,8 @@ int main(int argc, char **argv)
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyb);
+	glutKeyboardFunc(key_down);
+	glutKeyboardUpFunc(key_up);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
 

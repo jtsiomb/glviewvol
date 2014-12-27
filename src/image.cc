@@ -1,3 +1,4 @@
+#include <string.h>
 #include <imago2.h>
 #include "image.h"
 
@@ -39,7 +40,7 @@ bool Image::load(const char *fname)
 	// TODO dicom loader ... ?
 
 	int x, y;
-	float *pixels = img_load_pixels(fname, &x, &y, IMG_FMT_GREYF);
+	float *pixels = (float*)img_load_pixels(fname, &x, &y, IMG_FMT_GREYF);
 	if(!pixels) {
 		return false;
 	}

@@ -1,16 +1,18 @@
 #ifndef VOLUME_H_
 #define VOLUME_H_
 
+#include <vector>
 #include "image.h"
 
 class Volume {
 public:
 	virtual ~Volume();
 
-	// returns -1 if the volume is continuously defined
+	// returns 0 if the volume is continuously defined
 	virtual int num_samples(int dim) const;
 
-	// central differences offset will be delta / num_samples
+	// central differences offset will be delta / num_samples for discrete volumes
+	// and delta for continuous volumes
 	virtual void normalf(float *norm, float x, float y, float z, float delta = 1.0);
 	virtual void normali(float *norm, int x, int y, int z);
 
@@ -20,11 +22,11 @@ public:
 
 class VoxelVolume : public Volume {
 protected:
+	int size[3];
 	std::vector<Image> slices;
 
 public:
 	VoxelVolume();
-	~VoxelVolume();
 
 	bool load(const char *fname);
 
