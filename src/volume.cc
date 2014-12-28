@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <alloca.h>
 #include <errno.h>
 #include <math.h>
 #include "volume.h"
@@ -80,18 +81,28 @@ VoxelVolume::VoxelVolume()
 
 bool VoxelVolume::load(const char *fname)
 {
+	char *prefix = (char*)alloca(strlen(fname) + 1);
+	strcpy(prefix, fname);
+	char *slash = strrchr(prefix, '/');
+	if(slash) {
+		*slash = 0;
+	} else {
+		prefix = 0;
+	}
+
 	FILE *fp = fopen(fname, "r");
 	if(!fp) {
 		fprintf(stderr, "failed to open file: %s: %s\n", fname, strerror(errno));
 		return false;
 	}
 
-	char buf[512];
+	char buf[256], path[300];
 	while(fgets(buf, sizeof buf, fp)) {
 		char *line = strip_space(buf);
+		sprintf(path, "%s/%s", prefix, line);
 
 		Image img;
-		if(!img.load(line)) {
+		if(!img.load(path)) {
 			slices.clear();
 			return false;
 		}
