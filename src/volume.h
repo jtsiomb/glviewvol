@@ -27,6 +27,7 @@ protected:
 
 public:
 	VoxelVolume();
+	~VoxelVolume();
 
 	bool load(const char *fname);
 

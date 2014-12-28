@@ -79,8 +79,17 @@ VoxelVolume::VoxelVolume()
 	size[0] = size[1] = size[2] = 0;
 }
 
+VoxelVolume::~VoxelVolume()
+{
+	for(size_t i=0; i<slices.size(); i++) {
+		slices[i].destroy();
+	}
+}
+
 bool VoxelVolume::load(const char *fname)
 {
+	if(!fname) return false;
+
 	char *prefix = (char*)alloca(strlen(fname) + 1);
 	strcpy(prefix, fname);
 	char *slash = strrchr(prefix, '/');
@@ -120,7 +129,6 @@ bool VoxelVolume::load(const char *fname)
 		}
 
 		slices.push_back(img);
-		img.pixels = 0;	// otherwise the destructor will free it
 	}
 
 	size[2] = slices.size();

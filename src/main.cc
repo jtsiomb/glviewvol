@@ -11,6 +11,7 @@
 #endif
 
 #include "dicomview.h"
+#include "opt.h"
 
 static void display();
 static void reshape(int x, int y);
@@ -22,6 +23,11 @@ static void motion(int x, int y);
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
+
+	if(parse_args(argc, argv) == -1) {
+		return 1;
+	}
+
 	glutInitWindowSize(1280, 800);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutCreateWindow("dicom viewer");

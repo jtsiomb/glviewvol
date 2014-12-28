@@ -7,7 +7,8 @@ public:
 	float *pixels;
 
 	Image();
-	~Image();
+
+	void destroy();
 
 	// if data == 0, just allocate space
 	bool set_pixels(int x, int y, float *data = 0);

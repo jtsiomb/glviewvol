@@ -1,20 +1,45 @@
+#include <stdio.h>
 #include "opengl.h"
 #include "dicomview.h"
 #include "rend_fast.h"
+#include "opt.h"
+#include "volume.h"
 
 static int win_width, win_height;
 static float cam_theta, cam_phi, cam_dist = 6;
 
 static Renderer *rend;
+static Volume *vol;
 
 extern "C" {
 
 int init()
 {
-	rend = new RendererFast;
-	if(!rend->init()) {
+	if(!opt.fname) {
+		fprintf(stderr, "you must specify the volume data filename\n");
 		return -1;
 	}
+
+	switch(opt.rend_type) {
+	case REND_FAST:
+		rend = new RendererFast;
+		break;
+	default:
+		return -1;
+	}
+
+	if(!rend->init()) {
+		fprintf(stderr, "renderer initialization failed\n");
+		return -1;
+	}
+
+	VoxelVolume *voxvol = new VoxelVolume;
+	if(!voxvol->load(opt.fname)) {
+		fprintf(stderr, "failed to load volume data from: %s\n", opt.fname);
+		return -1;
+	}
+	vol = voxvol;
+	rend->set_volume(vol);
 
 	return 0;
 }
@@ -23,6 +48,7 @@ void cleanup()
 {
 	rend->destroy();
 	delete rend;
+	delete vol;
 }
 
 void ev_display()

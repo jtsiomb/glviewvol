@@ -8,7 +8,7 @@ Image::Image()
 	pixels = 0;
 }
 
-Image::~Image()
+void Image::destroy()
 {
 	delete [] pixels;
 }
