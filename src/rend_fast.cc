@@ -3,6 +3,8 @@
 #include "rend_fast.h"
 #include "sdr.h"
 
+static inline float smoothstep(float a, float b, float x);
+
 #define XFER_MAP_SZ		1024
 
 static unsigned int sdr;
@@ -53,6 +55,12 @@ Curve &RendererFast::transfer_curve(int color)
 {
 	xfer_tex_valid = false;
 	return Renderer::transfer_curve(color);
+}
+
+void RendererFast::set_simple_transfer(float low, float high)
+{
+	xfer_tex_valid = false;
+	Renderer::set_simple_transfer(low, high);
 }
 
 void RendererFast::update(unsigned int msec)
@@ -118,9 +126,18 @@ void RendererFast::update(unsigned int msec)
 
 		for(int i=0; i<XFER_MAP_SZ; i++) {
 			float x = (float)i / (float)(XFER_MAP_SZ - 1);
+
+			// TODO make 0.1 a tweakable parameter
+			float val = smoothstep(xfer_low - 0.1, xfer_low + 0.1, x);
+			val *= 1.0 - smoothstep(xfer_high - 0.1, xfer_high + 0.1, x);
+			*pptr++ = val;
+			*pptr++ = val;
+			*pptr++ = val;
+			/*
 			*pptr++ = xfer[0].value(x);
 			*pptr++ = xfer[1].value(x);
 			*pptr++ = xfer[2].value(x);
+			*/
 		}
 
 		glBindTexture(GL_TEXTURE_1D, xfer_tex);
@@ -167,4 +184,13 @@ void RendererFast::render() const
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+}
+
+static inline float smoothstep(float a, float b, float x)
+{
+	if(x < a) return 0.0;
+	if(x >= b) return 1.0;
+
+	x = (x - a) / (b - a);
+	return x * x * (3.0 - 2.0 * x);
 }

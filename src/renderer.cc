@@ -12,6 +12,9 @@ Renderer::Renderer()
 		xfer[i].set_point(1, 1);
 	}
 
+	xfer_low = 0.0;
+	xfer_high = 1.0;
+
 	for(int i=0; i<MAX_CLIP_PLANES; i++) {
 		disable_clipping_plane(i);
 	}
@@ -49,6 +52,18 @@ Curve &Renderer::transfer_curve(int color)
 const Curve &Renderer::transfer_curve(int color) const
 {
 	return xfer[color];
+}
+
+void Renderer::set_simple_transfer(float low, float high)
+{
+	xfer_low = std::min(low, high);
+	xfer_high = std::max(low, high);
+}
+
+void Renderer::get_simple_transfer(float *low, float *high) const
+{
+	*low = xfer_low;
+	*high = xfer_high;
 }
 
 void Renderer::set_clipping_plane(int idx, float nx, float ny, float nz, float dist)

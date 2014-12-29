@@ -16,6 +16,7 @@ public:
 
 	void set_volume(Volume *vol);
 	Curve &transfer_curve(int color);
+	void set_simple_transfer(float low, float high);
 
 	void update(unsigned int msec);
 	void render() const;

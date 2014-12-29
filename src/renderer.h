@@ -14,6 +14,7 @@ protected:
 	float clip_plane[MAX_CLIP_PLANES][4];	// nx,ny,nz,dist
 
 	Curve xfer[3];	// rgb transfer function
+	float xfer_low, xfer_high;	// simple transfer function bounds
 
 public:
 	Renderer();
@@ -27,6 +28,9 @@ public:
 
 	virtual Curve &transfer_curve(int color);
 	virtual const Curve &transfer_curve(int color) const;
+
+	virtual void set_simple_transfer(float low, float high);
+	virtual void get_simple_transfer(float *low, float *high) const;
 
 	virtual void set_clipping_plane(int idx, float nx, float ny, float nz, float dist);
 	virtual void disable_clipping_plane(int idx);

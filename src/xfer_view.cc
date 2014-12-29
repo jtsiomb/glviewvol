@@ -6,7 +6,7 @@
 static Renderer *rend;
 
 static int act_color = 3;
-static CurvePoint *cpsel[3];
+static CurvePoint *cpsel;
 
 bool xfview_init(Renderer *rendarg)
 {
@@ -109,13 +109,17 @@ void xfview_draw()
 
 void xfview_button(int bn, int press, int x, int y)
 {
-	if(bn == 2 && press) {
+	if(bn == 2 && press && !cpsel) {
 		act_color = (act_color + 1) % 4;
 		redisplay();
 		return;
 	}
 
-	if(press) {
+	if(bn == 1) {
+		if(press) {
+		} else {
+			cpsel = 0;
+		}
 	}
 }
 
