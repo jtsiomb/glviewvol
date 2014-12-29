@@ -18,6 +18,7 @@ void ev_mouse_motion(int x, int y);
 void swap_buffers();
 void redisplay();
 void quit();
+void get_window_size(int *xsz, int *ysz);
 
 #ifdef __cplusplus
 }

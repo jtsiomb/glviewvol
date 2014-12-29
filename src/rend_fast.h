@@ -5,14 +5,17 @@
 
 class RendererFast : public Renderer {
 private:
-	unsigned int vol_tex;
-	bool vol_tex_valid;
+	unsigned int vol_tex, xfer_tex;
+	bool vol_tex_valid, xfer_tex_valid;
 
 public:
 	RendererFast();
 
 	bool init();
 	void destroy();
+
+	void set_volume(Volume *vol);
+	Curve &transfer_curve(int color);
 
 	void update(unsigned int msec);
 	void render() const;

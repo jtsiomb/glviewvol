@@ -1,18 +1,38 @@
+#include <stdio.h>
 #include "opengl.h"
 #include "rend_fast.h"
+#include "sdr.h"
+
+#define XFER_MAP_SZ		1024
+
+static unsigned int sdr;
+static bool have_tex_float;
 
 RendererFast::RendererFast()
 {
-	vol_tex = 0;
-	vol_tex_valid = false;
+	vol_tex = xfer_tex = 0;
+	vol_tex_valid = xfer_tex_valid = false;
 }
 
 bool RendererFast::init()
 {
+	if(!sdr) {
+		if(!(sdr = create_program_load("sdr/fast.v.glsl", "sdr/fast.p.glsl"))) {
+			return false;
+		}
+		have_tex_float = GLEW_ARB_texture_float;
+	}
+
 	glGenTextures(1, &vol_tex);
 	glBindTexture(GL_TEXTURE_3D, vol_tex);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenTextures(1, &xfer_tex);
+	glBindTexture(GL_TEXTURE_1D, xfer_tex);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage1D(GL_TEXTURE_1D, 0, have_tex_float ? GL_RGB16F : GL_RGB, XFER_MAP_SZ, 0, GL_RGB, GL_FLOAT, 0);
 
 	return true;
 }
@@ -20,6 +40,19 @@ bool RendererFast::init()
 void RendererFast::destroy()
 {
 	glDeleteTextures(1, &vol_tex);
+	glDeleteTextures(1, &xfer_tex);
+}
+
+void RendererFast::set_volume(Volume *vol)
+{
+	vol_tex_valid = false;
+	Renderer::set_volume(vol);
+}
+
+Curve &RendererFast::transfer_curve(int color)
+{
+	xfer_tex_valid = false;
+	return Renderer::transfer_curve(color);
 }
 
 void RendererFast::update(unsigned int msec)
@@ -37,6 +70,9 @@ void RendererFast::update(unsigned int msec)
 			xsz = ysz = zsz = 256;
 		}
 
+		printf("updating 3D texture data (%dx%dx%d) ... ", xsz, ysz, zsz);
+		fflush(stdout);
+
 		int int_fmt = GLEW_ARB_texture_float ? GL_RGBA16F_ARB : GL_RGBA;
 
 		glBindTexture(GL_TEXTURE_3D, vol_tex);
@@ -45,13 +81,13 @@ void RendererFast::update(unsigned int msec)
 		float *slice = new float[xsz * ysz * 4];
 
 		for(int i=0; i<zsz; i++) {
-			float z = (float)i / (float)(zsz - 1);
+			float z = (float)i;
 			float *pptr = slice;
 
 			for(int j=0; j<ysz; j++) {
-				float y = (float)j / (float)(ysz - 1);
+				float y = (float)j;
 				for(int k=0; k<xsz; k++) {
-					float x = (float)k / (float)(xsz - 1);
+					float x = (float)k;
 
 					// value in alpha channel
 					pptr[3] = vol->valuef(x, y, z);
@@ -61,15 +97,36 @@ void RendererFast::update(unsigned int msec)
 					pptr[0] = pptr[0] * 0.5 + 0.5;
 					pptr[1] = pptr[1] * 0.5 + 0.5;
 					pptr[2] = pptr[2] * 0.5 + 0.5;
+
+					pptr += 4;
 				}
 			}
 
 			glTexSubImage3D(GL_TEXTURE_3D, 0, 0, 0, i, xsz, ysz, 1, GL_RGBA, GL_FLOAT, slice);
 		}
 
+		printf("done\n");
+
 		delete [] slice;
 
 		vol_tex_valid = true;
+	}
+
+	if(!xfer_tex_valid) {
+		float pixels[XFER_MAP_SZ * 3];
+		float *pptr = pixels;
+
+		for(int i=0; i<XFER_MAP_SZ; i++) {
+			float x = (float)i / (float)(XFER_MAP_SZ - 1);
+			*pptr++ = xfer[0].value(x);
+			*pptr++ = xfer[1].value(x);
+			*pptr++ = xfer[2].value(x);
+		}
+
+		glBindTexture(GL_TEXTURE_1D, xfer_tex);
+		glTexSubImage1D(GL_TEXTURE_1D, 0, 0, XFER_MAP_SZ, GL_RGB, GL_FLOAT, pixels);
+
+		xfer_tex_valid = true;
 	}
 }
 
@@ -87,13 +144,24 @@ void RendererFast::render() const
 	glPushMatrix();
 	glLoadIdentity();
 
+	glUseProgram(sdr);
+
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_3D, vol_tex);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_1D, xfer_tex);
+
+	set_uniform_int(sdr, "vol_tex", 0);
+	set_uniform_int(sdr, "xfer_tex", 1);
+
 	glBegin(GL_QUADS);
-	glTexCoord3f(0, 0, 0); glVertex2f(-1, -1);
-	glTexCoord3f(1, 0, 0); glVertex2f(1, -1);
-	glTexCoord3f(1, 1, 0); glVertex2f(1, 1);
-	glTexCoord3f(0, 1, 0); glVertex2f(-1, 1);
+	glTexCoord3f(0, 0, 0.5); glVertex2f(-1, -1);
+	glTexCoord3f(1, 0, 0.5); glVertex2f(1, -1);
+	glTexCoord3f(1, 1, 0.5); glVertex2f(1, 1);
+	glTexCoord3f(0, 1, 0.5); glVertex2f(-1, 1);
 	glEnd();
+
+	glUseProgram(0);
 
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();

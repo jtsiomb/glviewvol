@@ -1,3 +1,4 @@
+#include <math.h>
 #include "renderer.h"
 
 Renderer::Renderer()
@@ -5,6 +6,15 @@ Renderer::Renderer()
 	vol = 0;
 	view_width = 512;
 	view_height = 512;
+
+	for(int i=0; i<3; i++) {
+		xfer[i].set_point(0, 0);
+		xfer[i].set_point(1, 1);
+	}
+
+	for(int i=0; i<MAX_CLIP_PLANES; i++) {
+		disable_clipping_plane(i);
+	}
 }
 
 Renderer::~Renderer()
@@ -29,6 +39,37 @@ void Renderer::set_volume(Volume *vol)
 Volume *Renderer::get_volume() const
 {
 	return vol;
+}
+
+Curve &Renderer::transfer_curve(int color)
+{
+	return xfer[color];
+}
+
+const Curve &Renderer::transfer_curve(int color) const
+{
+	return xfer[color];
+}
+
+void Renderer::set_clipping_plane(int idx, float nx, float ny, float nz, float dist)
+{
+	float len = sqrt(nx * nx + ny * ny + nz * nz);
+	if(len != 0.0) {
+		nx /= len;
+		ny /= len;
+		nz /= len;
+	}
+	clip_plane[idx][0] = nx;
+	clip_plane[idx][1] = ny;
+	clip_plane[idx][2] = nz;
+	clip_plane[idx][3] = dist;
+}
+
+void Renderer::disable_clipping_plane(int idx)
+{
+	clip_plane[idx][0] = clip_plane[idx][2] = 0;
+	clip_plane[idx][1] = 1;
+	clip_plane[idx][3] = -1;
 }
 
 void Renderer::reshape(int x, int y)

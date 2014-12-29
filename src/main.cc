@@ -20,6 +20,8 @@ static void key_up(unsigned char key, int x, int y);
 static void mouse(int bn, int state, int x, int y);
 static void motion(int x, int y);
 
+static int win_width, win_height;
+
 int main(int argc, char **argv)
 {
 	glutInit(&argc, argv);
@@ -65,6 +67,12 @@ void quit()
 	exit(0);
 }
 
+void get_window_size(int *xsz, int *ysz)
+{
+	*xsz = win_width;
+	*ysz = win_height;
+}
+
 static void display()
 {
 	ev_display();
@@ -72,6 +80,8 @@ static void display()
 
 static void reshape(int x, int y)
 {
+	win_width = x;
+	win_height = y;
 	ev_reshape(x, y);
 }
 

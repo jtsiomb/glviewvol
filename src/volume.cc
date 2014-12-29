@@ -99,6 +99,7 @@ bool VoxelVolume::load(const char *fname)
 		prefix = 0;
 	}
 
+	printf("loading volume dataset: %s\n", fname);
 	FILE *fp = fopen(fname, "r");
 	if(!fp) {
 		fprintf(stderr, "failed to open file: %s: %s\n", fname, strerror(errno));
@@ -110,6 +111,7 @@ bool VoxelVolume::load(const char *fname)
 		char *line = strip_space(buf);
 		sprintf(path, "%s/%s", prefix, line);
 
+		printf("  loading slice %d: %s\n", (int)slices.size(), path);
 		Image img;
 		if(!img.load(path)) {
 			slices.clear();
