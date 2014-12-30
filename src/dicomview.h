@@ -19,6 +19,7 @@ void swap_buffers();
 void redisplay();
 void quit();
 void get_window_size(int *xsz, int *ysz);
+unsigned int get_modifiers();
 
 #ifdef __cplusplus
 }

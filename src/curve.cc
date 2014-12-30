@@ -43,7 +43,7 @@ bool Curve::delete_point(uint16_t ti)
 
 CurvePoint *Curve::get_point(int idx)
 {
-	if(idx < 0 || idx >= cp.size()) {
+	if(idx < 0 || idx >= (int)cp.size()) {
 		return 0;
 	}
 	return &cp[idx];
@@ -51,7 +51,7 @@ CurvePoint *Curve::get_point(int idx)
 
 const CurvePoint *Curve::get_point(int idx) const
 {
-	if(idx < 0 || idx >= cp.size()) {
+	if(idx < 0 || idx >= (int)cp.size()) {
 		return 0;
 	}
 	return &cp[idx];

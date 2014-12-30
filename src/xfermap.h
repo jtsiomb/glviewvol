@@ -12,10 +12,19 @@ public:
 class TransferWindow : public TransferFunc {
 private:
 	float soft_rad;
-	float low[4], high[4];	// rgb
+	float low[3], high[3];	// rgb
 
 public:
+	enum { HANDLE_LOW = 0, HANDLE_HIGH = 1};
+
 	TransferWindow();
+
+	// handle: 0 or HANDLE_LOW is low, 1 or HANDLE_HIGH is high
+	// if channel == -1, change all channels simultaneously
+	void set_handle(int channel, int handle, float val);
+	float get_handle(int channel, int handle) const;
+
+	int nearest_handle(int channel, float pos) const;
 
 	void set_interval(float a, float b);
 	void set_interval(float *rgba_low, float *rgba_high);

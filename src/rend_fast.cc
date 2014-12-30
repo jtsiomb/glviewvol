@@ -3,8 +3,6 @@
 #include "rend_fast.h"
 #include "sdr.h"
 
-static inline float smoothstep(float a, float b, float x);
-
 #define XFER_MAP_SZ		1024
 
 static unsigned int sdr;
@@ -117,6 +115,7 @@ void RendererFast::update(unsigned int msec)
 
 			if(xfer) {
 				xfer->map(x, pptr);
+				pptr[3] = std::max(pptr[0], std::max(pptr[1], pptr[2]));
 			} else {
 				pptr[0] = pptr[1] = pptr[2] = pptr[3] = x;
 			}
@@ -167,13 +166,4 @@ void RendererFast::render() const
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
-}
-
-static inline float smoothstep(float a, float b, float x)
-{
-	if(x < a) return 0.0;
-	if(x >= b) return 1.0;
-
-	x = (x - a) / (b - a);
-	return x * x * (3.0 - 2.0 * x);
 }

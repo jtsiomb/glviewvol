@@ -5,7 +5,7 @@ dep = $(obj:.o=.d)
 
 bin = dicomview
 
-opt = -O3 -ffast-math
+#opt = -O3 -ffast-math
 dbg = -g
 def = -DUSE_GLUT
 #inc =

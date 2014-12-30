@@ -21,6 +21,7 @@ static void mouse(int bn, int state, int x, int y);
 static void motion(int x, int y);
 
 static int win_width, win_height;
+static unsigned int mod;
 
 int main(int argc, char **argv)
 {
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
 	glutKeyboardUpFunc(key_up);
 	glutMouseFunc(mouse);
 	glutMotionFunc(motion);
+	glutPassiveMotionFunc(motion);
 
 	glewInit();
 
@@ -73,6 +75,11 @@ void get_window_size(int *xsz, int *ysz)
 	*ysz = win_height;
 }
 
+unsigned int get_modifiers()
+{
+	return mod;
+}
+
 static void display()
 {
 	ev_display();
@@ -87,16 +94,19 @@ static void reshape(int x, int y)
 
 static void key_down(unsigned char key, int x, int y)
 {
+	mod = glutGetModifiers();
 	ev_keyboard(key, 1, x, y);
 }
 
 static void key_up(unsigned char key, int x, int y)
 {
+	mod = glutGetModifiers();
 	ev_keyboard(key, 0, x, y);
 }
 
 static void mouse(int bn, int state, int x, int y)
 {
+	mod = glutGetModifiers();
 	ev_mouse_button(bn - GLUT_LEFT_BUTTON, state == GLUT_DOWN ? 1 : 0, x, y);
 }
 
