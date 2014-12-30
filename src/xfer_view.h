@@ -1,9 +1,9 @@
 #ifndef XFER_VIEW_H_
 #define XFER_VIEW_H_
 
-#include "renderer.h"
+#include "xfermap.h"
 
-bool xfview_init(Renderer *rend);
+bool xfview_init(TransferFunc *xfer);
 void xfview_destroy();
 
 void xfview_draw();

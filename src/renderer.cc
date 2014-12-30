@@ -7,14 +7,6 @@ Renderer::Renderer()
 	view_width = 512;
 	view_height = 512;
 
-	for(int i=0; i<3; i++) {
-		xfer[i].set_point(0, 0);
-		xfer[i].set_point(1, 1);
-	}
-
-	xfer_low = 0.0;
-	xfer_high = 1.0;
-
 	for(int i=0; i<MAX_CLIP_PLANES; i++) {
 		disable_clipping_plane(i);
 	}
@@ -44,26 +36,14 @@ Volume *Renderer::get_volume() const
 	return vol;
 }
 
-Curve &Renderer::transfer_curve(int color)
+void Renderer::set_transfer_function(TransferFunc *xfer)
 {
-	return xfer[color];
+	this->xfer = xfer;
 }
 
-const Curve &Renderer::transfer_curve(int color) const
+TransferFunc *Renderer::get_transfer_function() const
 {
-	return xfer[color];
-}
-
-void Renderer::set_simple_transfer(float low, float high)
-{
-	xfer_low = std::min(low, high);
-	xfer_high = std::max(low, high);
-}
-
-void Renderer::get_simple_transfer(float *low, float *high) const
-{
-	*low = xfer_low;
-	*high = xfer_high;
+	return xfer;
 }
 
 void Renderer::set_clipping_plane(int idx, float nx, float ny, float nz, float dist)

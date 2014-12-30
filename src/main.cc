@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	glutInitWindowSize(1280, 800);
+	glutInitWindowSize(opt.xsz, opt.ysz);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 	glutCreateWindow("dicom viewer");
 

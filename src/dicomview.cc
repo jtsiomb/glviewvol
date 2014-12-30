@@ -15,6 +15,7 @@ static int splitter_y = -1;
 
 static Renderer *rend;
 static Volume *vol;
+static TransferFunc *xfer;
 
 extern "C" {
 
@@ -46,7 +47,10 @@ int init()
 	vol = voxvol;
 	rend->set_volume(vol);
 
-	if(!xfview_init(rend)) {
+	xfer = new TransferWindow;
+	rend->set_transfer_function(xfer);
+
+	if(!xfview_init(xfer)) {
 		return -1;
 	}
 
@@ -60,6 +64,7 @@ void cleanup()
 	rend->destroy();
 	delete rend;
 	delete vol;
+	delete xfer;
 }
 
 void ev_display()

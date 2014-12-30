@@ -34,7 +34,7 @@ bool RendererFast::init()
 	glBindTexture(GL_TEXTURE_1D, xfer_tex);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage1D(GL_TEXTURE_1D, 0, have_tex_float ? GL_RGB16F : GL_RGB, XFER_MAP_SZ, 0, GL_RGB, GL_FLOAT, 0);
+	glTexImage1D(GL_TEXTURE_1D, 0, have_tex_float ? GL_RGBA16F : GL_RGBA, XFER_MAP_SZ, 0, GL_RGB, GL_FLOAT, 0);
 
 	return true;
 }
@@ -49,18 +49,6 @@ void RendererFast::set_volume(Volume *vol)
 {
 	vol_tex_valid = false;
 	Renderer::set_volume(vol);
-}
-
-Curve &RendererFast::transfer_curve(int color)
-{
-	xfer_tex_valid = false;
-	return Renderer::transfer_curve(color);
-}
-
-void RendererFast::set_simple_transfer(float low, float high)
-{
-	xfer_tex_valid = false;
-	Renderer::set_simple_transfer(low, high);
 }
 
 void RendererFast::update(unsigned int msec)
@@ -120,28 +108,23 @@ void RendererFast::update(unsigned int msec)
 		vol_tex_valid = true;
 	}
 
-	if(!xfer_tex_valid) {
-		float pixels[XFER_MAP_SZ * 3];
+	if(1) {//if(!xfer_tex_valid) {
+		float pixels[XFER_MAP_SZ * 4];
 		float *pptr = pixels;
 
 		for(int i=0; i<XFER_MAP_SZ; i++) {
 			float x = (float)i / (float)(XFER_MAP_SZ - 1);
 
-			// TODO make 0.1 a tweakable parameter
-			float val = smoothstep(xfer_low - 0.1, xfer_low + 0.1, x);
-			val *= 1.0 - smoothstep(xfer_high - 0.1, xfer_high + 0.1, x);
-			*pptr++ = val;
-			*pptr++ = val;
-			*pptr++ = val;
-			/*
-			*pptr++ = xfer[0].value(x);
-			*pptr++ = xfer[1].value(x);
-			*pptr++ = xfer[2].value(x);
-			*/
+			if(xfer) {
+				xfer->map(x, pptr);
+			} else {
+				pptr[0] = pptr[1] = pptr[2] = pptr[3] = x;
+			}
+			pptr += 4;
 		}
 
 		glBindTexture(GL_TEXTURE_1D, xfer_tex);
-		glTexSubImage1D(GL_TEXTURE_1D, 0, 0, XFER_MAP_SZ, GL_RGB, GL_FLOAT, pixels);
+		glTexSubImage1D(GL_TEXTURE_1D, 0, 0, XFER_MAP_SZ, GL_RGBA, GL_FLOAT, pixels);
 
 		xfer_tex_valid = true;
 	}

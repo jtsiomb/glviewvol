@@ -2,7 +2,7 @@
 #define RENDERER_H_
 
 #include "volume.h"
-#include "curve.h"
+#include "xfermap.h"
 
 #define MAX_CLIP_PLANES		4
 
@@ -13,8 +13,7 @@ protected:
 
 	float clip_plane[MAX_CLIP_PLANES][4];	// nx,ny,nz,dist
 
-	Curve xfer[3];	// rgb transfer function
-	float xfer_low, xfer_high;	// simple transfer function bounds
+	TransferFunc *xfer;
 
 public:
 	Renderer();
@@ -26,11 +25,8 @@ public:
 	virtual void set_volume(Volume *vol);
 	virtual Volume *get_volume() const;
 
-	virtual Curve &transfer_curve(int color);
-	virtual const Curve &transfer_curve(int color) const;
-
-	virtual void set_simple_transfer(float low, float high);
-	virtual void get_simple_transfer(float *low, float *high) const;
+	virtual void set_transfer_function(TransferFunc *xfer);
+	virtual TransferFunc *get_transfer_function() const;
 
 	virtual void set_clipping_plane(int idx, float nx, float ny, float nz, float dist);
 	virtual void disable_clipping_plane(int idx);

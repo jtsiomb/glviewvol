@@ -9,6 +9,7 @@ enum RendererType {
 struct Options {
 	char *fname;
 	RendererType rend_type;
+	int xsz, ysz;
 };
 
 extern Options opt;

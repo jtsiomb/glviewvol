@@ -16,6 +16,8 @@ static void init_opt()
 {
 	opt.fname = 0;
 	opt.rend_type = REND_FAST;
+	opt.xsz = 800;
+	opt.ysz = 800;
 }
 
 static RendererType renderer_type(const char *name)
@@ -36,6 +38,13 @@ int parse_args(int argc, char **argv)
 		if(argv[i][0] == '-') {
 			if(argv[i][2] == 0) {
 				switch(argv[i][1]) {
+				case 's':
+					if(sscanf(argv[++i], "%dx%d", &opt.xsz, &opt.ysz) != 2) {
+						fprintf(stderr, "-s must be followed by the window size (WxH)\n");
+						return -1;
+					}
+					break;
+
 				case 'r':
 					if((opt.rend_type = renderer_type(argv[++i])) == REND_NONE) {
 						if(strcmp(argv[i], "help") == 0) {
