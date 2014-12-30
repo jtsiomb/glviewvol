@@ -8,7 +8,8 @@
 #include "xfer_view.h"
 
 static int win_width, win_height;
-static float cam_theta, cam_phi, cam_dist = 6;
+static float cam_theta, cam_phi, cam_dist = 4;
+static float pre_rot = -90;
 static int splitter_y = -1;
 
 #define SPLITTER_WIDTH			5
@@ -81,7 +82,7 @@ void ev_display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(0, 0, -cam_dist);
-	glRotatef(cam_phi, 1, 0, 0);
+	glRotatef(cam_phi + pre_rot, 1, 0, 0);
 	glRotatef(cam_theta, 0, 1, 0);
 
 	rend->update(0);
@@ -135,10 +136,40 @@ void ev_reshape(int x, int y)
 
 void ev_keyboard(int key, int press, int x, int y)
 {
+	RendererFast *fr;
+
 	if(press) {
 		switch(key) {
 		case 27:
 			quit();
+
+		case '=':
+			if((fr = dynamic_cast<RendererFast*>(rend))) {
+				int n = fr->get_proxy_count();
+				int add = n / 4;
+				n += add < 1 ? 1 : add;
+				printf("proxy count: %d\n", n);
+				fr->set_proxy_count(n);
+			}
+			redisplay();
+			break;
+
+		case '-':
+			if((fr = dynamic_cast<RendererFast*>(rend))) {
+				int n = fr->get_proxy_count();
+				int sub = n / 4;
+				n -= sub < 1 ? 1 : sub;
+
+				if(n < 1) n = 1;
+
+				printf("proxy count: %d\n", n);
+				fr->set_proxy_count(n);
+			}
+			redisplay();
+			break;
+
+		default:
+			break;
 		}
 	}
 }

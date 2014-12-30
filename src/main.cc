@@ -95,6 +95,17 @@ static void reshape(int x, int y)
 static void key_down(unsigned char key, int x, int y)
 {
 	mod = glutGetModifiers();
+
+	switch(key) {
+	case 'i':
+		{
+			static bool fullrate;
+			fullrate = !fullrate;
+			glutIdleFunc(fullrate ? glutPostRedisplay : 0);
+		}
+		break;
+	}
+
 	ev_keyboard(key, 1, x, y);
 }
 

@@ -3,7 +3,7 @@
 #include "rend_fast.h"
 #include "sdr.h"
 
-#define XFER_MAP_SZ		1024
+#define XFER_MAP_SZ		512
 
 static unsigned int sdr;
 static bool have_tex_float;
@@ -12,6 +12,8 @@ RendererFast::RendererFast()
 {
 	vol_tex = xfer_tex = 0;
 	vol_tex_valid = xfer_tex_valid = false;
+	proxy_count = 256;
+	vbo_proxy_count = 0;
 }
 
 bool RendererFast::init()
@@ -27,13 +29,18 @@ bool RendererFast::init()
 	glBindTexture(GL_TEXTURE_3D, vol_tex);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
 	glGenTextures(1, &xfer_tex);
 	glBindTexture(GL_TEXTURE_1D, xfer_tex);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexImage1D(GL_TEXTURE_1D, 0, have_tex_float ? GL_RGBA16F : GL_RGBA, XFER_MAP_SZ, 0, GL_RGB, GL_FLOAT, 0);
 
+	glGenBuffers(1, &vbo);
 	return true;
 }
 
@@ -41,12 +48,23 @@ void RendererFast::destroy()
 {
 	glDeleteTextures(1, &vol_tex);
 	glDeleteTextures(1, &xfer_tex);
+	glDeleteBuffers(1, &vbo);
 }
 
 void RendererFast::set_volume(Volume *vol)
 {
 	vol_tex_valid = false;
 	Renderer::set_volume(vol);
+}
+
+void RendererFast::set_proxy_count(int n)
+{
+	proxy_count = n;
+}
+
+int RendererFast::get_proxy_count() const
+{
+	return proxy_count;
 }
 
 void RendererFast::update(unsigned int msec)
@@ -127,6 +145,32 @@ void RendererFast::update(unsigned int msec)
 
 		xfer_tex_valid = true;
 	}
+
+	// make sure the proxy object is up to date
+	if(proxy_count != vbo_proxy_count) {
+		static const float pat[][3] = {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}};
+
+		int nverts = proxy_count * 4;
+		float *verts = new float[nverts * 3];
+		float *vptr = verts;
+
+		for(int i=0; i<proxy_count; i++) {
+			float z = 2.0 * (float)i / (float)(proxy_count - 1) - 1.0;
+
+			for(int j=0; j<4; j++) {
+				*vptr++ = pat[j][0];
+				*vptr++ = pat[j][1];
+				*vptr++ = z;
+			}
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, nverts * 3 * sizeof(float), verts, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		delete [] verts;
+		vbo_proxy_count = proxy_count;
+	}
 }
 
 void RendererFast::render() const
@@ -134,14 +178,6 @@ void RendererFast::render() const
 	if(!vol) return;
 
 	glClear(GL_COLOR_BUFFER_BIT);
-
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
 
 	glUseProgram(sdr);
 
@@ -153,17 +189,18 @@ void RendererFast::render() const
 	set_uniform_int(sdr, "vol_tex", 0);
 	set_uniform_int(sdr, "xfer_tex", 1);
 
-	glBegin(GL_QUADS);
-	glTexCoord3f(0, 0, 0.5); glVertex2f(-1, -1);
-	glTexCoord3f(1, 0, 0.5); glVertex2f(1, -1);
-	glTexCoord3f(1, 1, 0.5); glVertex2f(1, 1);
-	glTexCoord3f(0, 1, 0.5); glVertex2f(-1, 1);
-	glEnd();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDrawArrays(GL_QUADS, 0, vbo_proxy_count * 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	glDisable(GL_BLEND);
 
 	glUseProgram(0);
-
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-	glPopMatrix();
 }
