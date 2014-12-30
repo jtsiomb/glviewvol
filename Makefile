@@ -10,9 +10,9 @@ dbg = -g
 def = -DUSE_GLUT
 #inc =
 
-CFLAGS = -pedantic -Wall $(opt) $(dbg) $(def) $(inc)
+CFLAGS = -pedantic -Wall -fopenmp $(opt) $(dbg) $(def) $(inc)
 CXXFLAGS = $(CFLAGS)
-LDFLAGS = $(libgl) -lm -limago
+LDFLAGS = $(libgl) -lm -limago -lgomp
 
 ifeq ($(shell uname -s), Darwin)
 	libgl = -framework OpenGL -framework GLUT -lGLEW

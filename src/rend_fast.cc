@@ -94,10 +94,12 @@ void RendererFast::update(unsigned int msec)
 
 		for(int i=0; i<zsz; i++) {
 			float z = (float)i;
-			float *pptr = slice;
 
+#pragma omp parallel for schedule(dynamic)
 			for(int j=0; j<ysz; j++) {
 				float y = (float)j;
+
+				float *pptr = slice + (j * xsz) * 4;
 				for(int k=0; k<xsz; k++) {
 					float x = (float)k;
 
