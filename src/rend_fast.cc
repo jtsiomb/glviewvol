@@ -3,6 +3,7 @@
 #include "rend_fast.h"
 #include "sdr.h"
 
+#define DEF_PROXY_COUNT	512
 #define XFER_MAP_SZ		512
 
 static unsigned int sdr;
@@ -12,7 +13,7 @@ RendererFast::RendererFast()
 {
 	vol_tex = xfer_tex = 0;
 	vol_tex_valid = xfer_tex_valid = false;
-	proxy_count = 256;
+	proxy_count = DEF_PROXY_COUNT;
 	vbo_proxy_count = 0;
 }
 
@@ -190,6 +191,7 @@ void RendererFast::render() const
 
 	set_uniform_int(sdr, "vol_tex", 0);
 	set_uniform_int(sdr, "xfer_tex", 1);
+	set_uniform_float(sdr, "zscale", zscale);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

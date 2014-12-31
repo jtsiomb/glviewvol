@@ -134,43 +134,51 @@ void ev_reshape(int x, int y)
 	}
 }
 
+static bool zscaling;
+
 void ev_keyboard(int key, int press, int x, int y)
 {
 	RendererFast *fr;
 
-	if(press) {
-		switch(key) {
-		case 27:
+	switch(key) {
+	case 27:
+		if(press) {
 			quit();
-
-		case '=':
-			if((fr = dynamic_cast<RendererFast*>(rend))) {
-				int n = fr->get_proxy_count();
-				int add = n / 4;
-				n += add < 1 ? 1 : add;
-				printf("proxy count: %d\n", n);
-				fr->set_proxy_count(n);
-			}
-			redisplay();
-			break;
-
-		case '-':
-			if((fr = dynamic_cast<RendererFast*>(rend))) {
-				int n = fr->get_proxy_count();
-				int sub = n / 4;
-				n -= sub < 1 ? 1 : sub;
-
-				if(n < 1) n = 1;
-
-				printf("proxy count: %d\n", n);
-				fr->set_proxy_count(n);
-			}
-			redisplay();
-			break;
-
-		default:
-			break;
 		}
+		break;
+
+	case 'z':
+	case 'Z':
+		zscaling = press;
+		break;
+
+	case '=':
+		if(press && (fr = dynamic_cast<RendererFast*>(rend))) {
+			int n = fr->get_proxy_count();
+			int add = n / 4;
+			n += add < 1 ? 1 : add;
+			printf("proxy count: %d\n", n);
+			fr->set_proxy_count(n);
+			redisplay();
+		}
+		break;
+
+	case '-':
+		if(press && (fr = dynamic_cast<RendererFast*>(rend))) {
+			int n = fr->get_proxy_count();
+			int sub = n / 4;
+			n -= sub < 1 ? 1 : sub;
+
+			if(n < 1) n = 1;
+
+			printf("proxy count: %d\n", n);
+			fr->set_proxy_count(n);
+			redisplay();
+		}
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -201,6 +209,13 @@ void ev_mouse_motion(int x, int y)
 	prev_y = y;
 
 	if((dx | dy) == 0) return;
+
+	if(bnstate[0] && zscaling) {
+		float s = rend->get_zscale() + (float)dy / (float)win_height;
+		rend->set_zscale(s < 0.0 ? 0.0 : s);
+		redisplay();
+		return;
+	}
 
 	if(splitter_dragging) {
 		splitter_y += dy;

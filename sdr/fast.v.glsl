@@ -1,3 +1,5 @@
+uniform float zscale;
+
 void main()
 {
 	mat4 mvmat = gl_ModelViewMatrix;
@@ -6,5 +8,5 @@ void main()
 
 	vec4 vertex = gl_Vertex;
 	gl_Position = gl_ProjectionMatrix * mvmat * vertex;
-	gl_TexCoord[0].xyz = gl_NormalMatrix * (vertex.xyz * vec3(1.0, 1.0, -1.0) * 1.732051) * 0.5 + 0.5;
+	gl_TexCoord[0].xyz = gl_NormalMatrix * (vertex.xyz * vec3(1.0, 1.0, -1.0) * 1.732051) * vec3(1.0, 1.0, zscale) * 0.5 + 0.5;
 }

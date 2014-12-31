@@ -14,6 +14,7 @@ protected:
 	float clip_plane[MAX_CLIP_PLANES][4];	// nx,ny,nz,dist
 
 	TransferFunc *xfer;
+	float zscale;
 
 public:
 	Renderer();
@@ -24,6 +25,9 @@ public:
 
 	virtual void set_volume(Volume *vol);
 	virtual Volume *get_volume() const;
+
+	virtual void set_zscale(float zs);
+	virtual float get_zscale() const;
 
 	virtual void set_transfer_function(TransferFunc *xfer);
 	virtual TransferFunc *get_transfer_function() const;

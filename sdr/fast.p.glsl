@@ -1,16 +1,18 @@
+#version 120
+
 uniform sampler3D vol_tex;
 uniform sampler1D xfer_tex;
 
-const vec3 light_dir[3] = {
+uniform vec3 light_dir[3] = vec3[3](
 	vec3(0.5, 0.5, 1.0),
 	vec3(-1.0, 0.2, 0.5),
 	vec3(-0.2, 0.0, -7.0)
-};
-const vec3 light_color[3] = {
+);
+uniform vec3 light_color[3] = vec3[3](
 	vec3(0.9, 0.7, 0.68),
 	vec3(0.5, 0.6, 0.9),
 	vec3(0.3, 0.3, 0.3)
-};	
+);	
 
 const vec3 ambient = vec3(0.1, 0.1, 0.1);
 const vec3 vdir = vec3(0.0, 0.0, 1.0);

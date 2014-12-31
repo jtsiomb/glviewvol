@@ -10,6 +10,8 @@ Renderer::Renderer()
 	for(int i=0; i<MAX_CLIP_PLANES; i++) {
 		disable_clipping_plane(i);
 	}
+
+	zscale = 1.0;
 }
 
 Renderer::~Renderer()
@@ -34,6 +36,16 @@ void Renderer::set_volume(Volume *vol)
 Volume *Renderer::get_volume() const
 {
 	return vol;
+}
+
+void Renderer::set_zscale(float zs)
+{
+	zscale = zs;
+}
+
+float Renderer::get_zscale() const
+{
+	return zscale;
 }
 
 void Renderer::set_transfer_function(TransferFunc *xfer)
