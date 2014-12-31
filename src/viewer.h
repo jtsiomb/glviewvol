@@ -1,5 +1,5 @@
-#ifndef DICOMVIEW_H_
-#define DICOMVIEW_H_
+#ifndef VIEWER_H_
+#define VIEWER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,4 +25,4 @@ unsigned int get_modifiers();
 }
 #endif
 
-#endif	// DICOMVIEW_H_
+#endif	// VIEWER_H_

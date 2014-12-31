@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "opengl.h"
-#include "dicomview.h"
+#include "viewer.h"
 #include "rend_fast.h"
 #include "opt.h"
 #include "volume.h"

@@ -2,7 +2,7 @@
 #include <math.h>
 #include "opengl.h"
 #include "xfer_view.h"
-#include "dicomview.h"
+#include "viewer.h"
 
 static TransferFunc *xfer;
 

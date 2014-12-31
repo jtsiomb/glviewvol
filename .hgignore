@@ -1,5 +1,5 @@
 \.o$
 \.d$
 \.swp$
-^dicomview$
+^glviewvol$
 ^data/

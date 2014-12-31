@@ -10,7 +10,7 @@
 #include <GL/glut.h>
 #endif
 
-#include "dicomview.h"
+#include "viewer.h"
 #include "opt.h"
 
 static void display();

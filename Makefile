@@ -3,7 +3,7 @@ ccsrc = $(wildcard src/*.cc)
 obj = $(csrc:.c=.o) $(ccsrc:.cc=.o)
 dep = $(obj:.o=.d)
 
-bin = dicomview
+bin = glviewvol
 
 opt = -O3 -ffast-math
 dbg = -g
