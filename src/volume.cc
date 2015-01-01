@@ -94,6 +94,10 @@ void Volume::normali(float *norm, int x, int y, int z)
 VoxelVolume::VoxelVolume()
 {
 	size[0] = size[1] = size[2] = 0;
+
+	hist_valid = false;
+	hist = 0;
+	num_hist_samples = 0;
 }
 
 VoxelVolume::~VoxelVolume()
@@ -151,6 +155,7 @@ bool VoxelVolume::load(const char *fname)
 	}
 
 	size[2] = slices.size();
+	hist_valid = false;
 	fclose(fp);
 	return true;
 }
@@ -221,6 +226,39 @@ float VoxelVolume::valuei(int x, int y, int z) const
 	z = clamp(z, 0, size[2] - 1);
 
 	return slices[z].pixels[y * size[0] + x];
+}
+
+float *VoxelVolume::calc_histogram(int hist_samples)
+{
+	if(hist && hist_samples == num_hist_samples && hist_valid) {
+		return hist;
+	}
+
+	int num_pixels = size[0] * size[1] * size[2];
+	if(!num_pixels) {
+		return 0;
+	}
+
+	delete [] hist;
+	hist = new float[hist_samples];
+	memset(hist, 0, hist_samples * sizeof *hist);
+
+	for(int i=0; i<size[2]; i++) {
+		float *pptr = slices[i].pixels;
+		for(int j=0; j<size[0] * size[1]; j++) {
+			int idx = (int)(*pptr++ * (float)hist_samples);
+
+			hist[idx] += 1.0;
+		}
+	}
+
+	for(int i=0; i<hist_samples; i++) {
+		hist[i] /= (float)num_pixels;
+	}
+
+	hist_valid = true;
+	num_hist_samples = hist_samples;
+	return hist;
 }
 
 static char *strip_space(char *s)

@@ -71,6 +71,7 @@ int init()
 	if(!xfview_init(xfer)) {
 		return -1;
 	}
+	xfview_set_volume(vol);
 
 	return 0;
 }

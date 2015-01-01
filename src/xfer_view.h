@@ -18,10 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef XFER_VIEW_H_
 #define XFER_VIEW_H_
 
+#include "volume.h"
 #include "xfermap.h"
 
 bool xfview_init(TransferFunc *xfer);
 void xfview_destroy();
+
+void xfview_set_volume(Volume *vol);
 
 void xfview_draw();
 

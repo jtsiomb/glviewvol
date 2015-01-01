@@ -20,8 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "opengl.h"
 #include "xfer_view.h"
 #include "viewer.h"
+#include "volume.h"
+
+static void draw_histogram();
 
 static TransferFunc *xfer;
+static Volume *vol;
 
 static int act_color = -1;
 static int grabbed_handle = -1;
@@ -35,6 +39,11 @@ bool xfview_init(TransferFunc *xferarg)
 
 void xfview_destroy()
 {
+}
+
+void xfview_set_volume(Volume *volarg)
+{
+	vol = volarg;
 }
 
 void xfview_draw()
@@ -63,6 +72,8 @@ void xfview_draw()
 	glVertex2f(1, 1);
 	glVertex2f(-1, 1);
 	glEnd();
+
+	draw_histogram();
 
 	glEnable(GL_LINE_SMOOTH);
 
@@ -189,6 +200,40 @@ void xfview_draw()
 	}
 
 	glDisable(GL_BLEND);
+}
+
+#define HIST_SAMPLES	256
+
+static void draw_histogram()
+{
+	VoxelVolume *voxvol = dynamic_cast<VoxelVolume*>(vol);
+	if(!voxvol) return;
+
+	float *hist = voxvol->calc_histogram(HIST_SAMPLES);
+	if(!hist) return;
+
+	float max_y = 0.0f;
+	for(int i=0; i<HIST_SAMPLES; i++) {
+		if(hist[i] > max_y) {
+			max_y = hist[i];
+		}
+	}
+
+	float dx = 1.0 / (float)HIST_SAMPLES;
+	glBegin(GL_QUADS);
+	glColor3f(0.6, 0.6, 0.6);
+	for(int i=0; i<HIST_SAMPLES; i++) {
+		float x0 = (float)i / (float)HIST_SAMPLES;
+		float x1 = x0 + dx;
+
+		float y = hist[i] / max_y;
+
+		glVertex2f(x0, 0);
+		glVertex2f(x1, 0);
+		glVertex2f(x1, y);
+		glVertex2f(x0, y);
+	}
+	glEnd();
 }
 
 static int prev_x, prev_y;

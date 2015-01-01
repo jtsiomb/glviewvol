@@ -42,6 +42,10 @@ protected:
 	int size[3];
 	std::vector<Image> slices;
 
+	float *hist;
+	int num_hist_samples;
+	bool hist_valid;
+
 public:
 	VoxelVolume();
 	~VoxelVolume();
@@ -52,6 +56,8 @@ public:
 
 	float valuef(float x, float y, float z) const;
 	float valuei(int x, int y, int z) const;
+
+	float *calc_histogram(int hist_samples);
 };
 
 #endif	// VOLUME_H_
